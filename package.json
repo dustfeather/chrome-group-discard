@@ -9,7 +9,9 @@
         "typecheck": "tsc --noEmit",
         "test": "vitest run",
         "test:watch": "vitest",
-        "prepare": "git config core.hooksPath .githooks || true"
+        "prepare": "git config core.hooksPath .githooks || true",
+        "e2e": "node scripts/e2e.mjs",
+        "e2e:grant": "node scripts/e2e.mjs --grant"
     },
     "devDependencies": {
         "@crxjs/vite-plugin": "^2.7.1",

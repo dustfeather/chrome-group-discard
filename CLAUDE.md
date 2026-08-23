@@ -32,6 +32,24 @@
 - Chrome has no `contextMenus.onShown` (Firefox only), so the auto-pause
   checkbox is refreshed on `tabs.onActivated`.
 
+## Testing
+
+- `pnpm run test` is vitest against fake chrome APIs; `pnpm run e2e` /
+  `pnpm run e2e:grant` drive a real Chrome over CDP against a built `dist/`.
+  Run the e2e pair after touching anything in `src/background/` or
+  `src/snapshot/` — the fakes cannot catch discard/restore timing.
+- The e2e harness deliberately refuses snap chromium: its confinement breaks
+  `--user-data-dir` under /tmp and `--load-extension`, and the symptom is a
+  useless "No tab with id: N" mid-run. It picks a Chrome-for-Testing build from
+  the puppeteer/playwright caches by parsed version.
+- The harness's own media server must serve HTTP byte ranges. Without
+  `Accept-Ranges`/206 Chrome reports `seekable = [0,0]` on the reloaded tab and
+  silently clamps every `currentTime` write to 0 — which looks exactly like a
+  broken restore.
+- MV3 service workers are torn down when idle, which invalidates an attached CDP
+  execution context. `chrome.permissions` reads as `undefined` on a stale one;
+  re-resolve the target and re-attach rather than caching one session.
+
 ## Project facts
 
 - pnpm (not npm/yarn). Chrome only — no Firefox/AMO target.

@@ -70,8 +70,23 @@ The built extension is in `dist/`. Load it as an unpacked extension from
 ```bash
 pnpm run dev         # vite dev server with HMR
 pnpm run typecheck   # tsc --noEmit
-pnpm run test        # vitest
+pnpm run test        # vitest, against fake chrome APIs
+pnpm run build       # required before the e2e runs below
+pnpm run e2e         # real Chrome: discard on collapse, no host grant
+pnpm run e2e:grant   # real Chrome: snapshot capture + restore
 ```
+
+The vitest suite runs against fakes. `scripts/e2e.mjs` is the only layer that
+exercises `chrome.tabs.discard` and `chrome.tabGroups` for real: it loads the
+built `dist/` into a throwaway Chrome profile, drives the extension's own
+service worker over CDP to build and collapse a tab group, and asserts the
+discard, the snapshot contents and the restore. It needs a display and a
+Chrome-for-Testing build (`npx puppeteer browsers install chrome`, or set
+`CHROME=`), so it is not wired into CI.
+
+`e2e:grant` runs against a throwaway copy of the build with `<all_urls>`
+promoted to a required permission — `permissions.request()` needs a real user
+gesture and its consent bubble cannot be driven over CDP.
 
 `pnpm install` points `core.hooksPath` at `.githooks`, so typecheck and tests
 run on every commit.

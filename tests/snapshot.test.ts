@@ -251,6 +251,67 @@ describe("restoreSnapshot", () => {
         expect(video.play).toHaveBeenCalled();
     });
 
+    it("re-seeks when the first seek is clamped back because the media is not seekable yet", () => {
+        html(`<video></video>`);
+        const video = document.querySelector("video") as HTMLVideoElement;
+        Object.defineProperty(video, "readyState", { value: 1, configurable: true });
+        video.play = vi.fn(() => Promise.resolve());
+
+        // Chrome accepts the assignment and then clamps back to 0 until the
+        // resource is actually seekable.
+        let seekable = false;
+        let position = 0;
+        Object.defineProperty(video, "currentTime", {
+            configurable: true,
+            get: () => position,
+            set: (v: number) => {
+                position = seekable ? v : 0;
+            },
+        });
+
+        restoreSnapshot({
+            media: [
+                {
+                    selector: "html > body:nth-of-type(1) > video:nth-of-type(1)",
+                    currentTime: 30,
+                    paused: true,
+                },
+            ],
+            fields: [],
+        });
+
+        expect(video.currentTime).toBe(0); // clamped, restore not finished
+
+        seekable = true;
+        video.dispatchEvent(new Event("canplay"));
+
+        expect(video.currentTime).toBe(30);
+    });
+
+    it("stops listening once the seek has stuck", () => {
+        html(`<video></video>`);
+        const video = document.querySelector("video") as HTMLVideoElement;
+        Object.defineProperty(video, "readyState", { value: 1, configurable: true });
+        video.play = vi.fn(() => Promise.resolve());
+
+        restoreSnapshot({
+            media: [
+                {
+                    selector: "html > body:nth-of-type(1) > video:nth-of-type(1)",
+                    currentTime: 15,
+                    paused: true,
+                },
+            ],
+            fields: [],
+        });
+        expect(video.currentTime).toBe(15);
+
+        // A later ready event must not stomp on a user who has since scrubbed.
+        video.currentTime = 90;
+        video.dispatchEvent(new Event("canplay"));
+        expect(video.currentTime).toBe(90);
+    });
+
     it("swallows a rejected play() from the autoplay policy", () => {
         html(`<video></video>`);
         const video = document.querySelector("video") as HTMLVideoElement;

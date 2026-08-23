@@ -46,23 +46,36 @@ export function restoreSnapshot(snapshot: Snapshot): void {
         }
         if (!element) continue;
 
-        const apply = (media: HTMLMediaElement): void => {
+        const media = element;
+        const readyEvents = ["loadedmetadata", "loadeddata", "canplay"];
+        let applied = false;
+
+        const detach = (): void => {
+            for (let e = 0; e < readyEvents.length; e++) media.removeEventListener(readyEvents[e], apply);
+        };
+
+        function apply(): void {
+            if (applied) return;
             try {
                 media.currentTime = state.currentTime;
             } catch {
-                return;
+                return; // not seekable yet — a ready event will bring us back
             }
+            // A seek issued before the resource is actually seekable is accepted
+            // and then silently clamped back to 0, so confirm it stuck before
+            // treating the restore as done.
+            if (Math.abs(media.currentTime - state.currentTime) > 0.5) return;
+            applied = true;
+            detach();
             // Resuming can be refused by the autoplay policy; that is fine, the
             // position is what matters.
             if (!state.paused) void media.play().catch(() => {});
-        };
+        }
 
         // Seeking before metadata is available is ignored by the element.
-        if (element.readyState >= 1) {
-            apply(element);
-        } else {
-            const target = element;
-            target.addEventListener("loadedmetadata", () => apply(target), { once: true });
+        if (media.readyState >= 1) apply();
+        if (!applied) {
+            for (let e = 0; e < readyEvents.length; e++) media.addEventListener(readyEvents[e], apply);
         }
     }
 }
