@@ -1,0 +1,122 @@
+:root {
+    color-scheme: light dark;
+    --fg: #1b1b1f;
+    --muted: #5c5f6b;
+    --bg: #ffffff;
+    --card: #f5f6f8;
+    --border: #d8dae0;
+    --accent: #3f51b5;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --fg: #e6e7ea;
+        --muted: #a0a3ad;
+        --bg: #17181c;
+        --card: #212329;
+        --border: #34373f;
+        --accent: #8c9eff;
+    }
+}
+
+body {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    background: var(--bg);
+    color: var(--fg);
+    font: 14px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+main {
+    max-width: 44rem;
+    margin: 0 auto;
+}
+
+h1 {
+    margin: 0 0 1.5rem;
+    font-size: 1.5rem;
+}
+
+h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+}
+
+section {
+    margin-bottom: 1.75rem;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+}
+
+.muted {
+    margin: 0 0 0.9rem;
+    color: var(--muted);
+}
+
+.state {
+    display: inline-block;
+    margin: 0 0 0.9rem;
+    font-weight: 600;
+}
+
+button {
+    padding: 0.45rem 0.9rem;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: var(--accent);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    &.secondary {
+        border-color: var(--border);
+        background: transparent;
+        color: var(--fg);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: default;
+    }
+}
+
+.groups {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.5rem 0;
+        border-top: 1px solid var(--border);
+
+        &:first-child {
+            border-top: 0;
+        }
+    }
+
+    .swatch {
+        width: 0.85rem;
+        height: 0.85rem;
+        flex: none;
+        border-radius: 50%;
+        border: 1px solid rgb(0 0 0 / 0.2);
+    }
+
+    .title {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .badge {
+        color: var(--muted);
+        font-size: 0.8rem;
+    }
+}

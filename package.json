@@ -1,0 +1,28 @@
+{
+    "name": "group-snooze",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc --noEmit && vite build",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "prepare": "git config core.hooksPath .githooks || true"
+    },
+    "devDependencies": {
+        "@crxjs/vite-plugin": "^2.7.1",
+        "@types/chrome": "^0.2.0",
+        "jsdom": "^30.0.1",
+        "sass": "^1.100.0",
+        "typescript": "^6.0.3",
+        "vite": "^8.1.4",
+        "vitest": "^4.1.11"
+    },
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "esbuild"
+        ]
+    }
+}

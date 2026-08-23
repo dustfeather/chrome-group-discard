@@ -1,0 +1,121 @@
+name: Release
+
+on:
+    push:
+        branches: [main]
+
+permissions:
+    contents: write
+
+concurrency:
+    group: release
+    cancel-in-progress: true
+
+env:
+    FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+    tests:
+        permissions:
+            contents: read
+        uses: dustfeather/shared-workflows/.github/workflows/node-test.yml@v4
+        with:
+            runner: arc-df-chrome-group-discard
+
+    build:
+        needs: tests
+        runs-on: arc-df-chrome-group-discard
+        outputs:
+            version: ${{ steps.version.outputs.version }}
+            tag: ${{ steps.version.outputs.tag }}
+        steps:
+            - uses: actions/checkout@v6
+              with:
+                  fetch-depth: 0
+
+            - uses: pnpm/action-setup@v6
+              with:
+                  version: 10
+
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: "26"
+
+            - run: pnpm install --frozen-lockfile
+
+            - name: Determine next version from tags
+              id: version
+              run: |
+                  latest=$(git tag --list 'v*' --sort=-v:refname | head -n1)
+                  if [ -z "$latest" ]; then
+                    next="1.0.0"
+                  else
+                    IFS='.' read -r major minor patch <<< "${latest#v}"
+                    next="$major.$minor.$((patch + 1))"
+                  fi
+                  echo "version=$next" >> "$GITHUB_OUTPUT"
+                  echo "tag=v$next" >> "$GITHUB_OUTPUT"
+                  echo "Next version: $next (previous: ${latest:-none})"
+
+            - name: Inject version into manifest
+              run: |
+                  node -e "
+                    const fs = require('fs');
+                    const m = JSON.parse(fs.readFileSync('src/manifest.json', 'utf8'));
+                    m.version = '${{ steps.version.outputs.version }}';
+                    fs.writeFileSync('src/manifest.json', JSON.stringify(m, null, 4) + '\n');
+                  "
+
+            - run: pnpm run build
+
+            - name: Tag release
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+                  git tag "${{ steps.version.outputs.tag }}"
+                  git push origin "${{ steps.version.outputs.tag }}"
+
+            - name: Package Chrome extension
+              run: cd dist && zip -r ../group-snooze-chrome-${{ steps.version.outputs.tag }}.zip .
+
+            - name: Generate release notes
+              run: |
+                  PREV_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n2 | tail -n1)
+                  if [ -n "$PREV_TAG" ] && [ "$PREV_TAG" != "${{ steps.version.outputs.tag }}" ]; then
+                    git log "${PREV_TAG}..HEAD" --pretty=format:"- %s" > release-notes.txt
+                  else
+                    echo "- Initial release" > release-notes.txt
+                  fi
+
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v3
+              with:
+                  tag_name: ${{ steps.version.outputs.tag }}
+                  generate_release_notes: true
+                  files: |
+                      group-snooze-chrome-${{ steps.version.outputs.tag }}.zip
+
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v7
+              with:
+                  name: extension
+                  path: |
+                      group-snooze-chrome-${{ steps.version.outputs.tag }}.zip
+                      release-notes.txt
+
+    # ------------------------------------------------------------------------
+    # DISABLED until the Chrome Web Store item exists — see DESIGN.md §7.
+    #
+    # publish-chrome.yml can only UPDATE an existing item; it cannot create one.
+    # Until a human has uploaded a build through the Developer Dashboard once and
+    # the item ID is wired in, enabling this job only produces item-not-found
+    # failures. Uncomment after the PAUSE checklist in DESIGN.md is done.
+    #
+    # publish-chrome:
+    #     needs: build
+    #     uses: dustfeather/shared-workflows/.github/workflows/publish-chrome.yml@v4
+    #     with:
+    #         runner: arc-df-chrome-group-discard
+    #         zip-name: group-snooze-chrome-${{ needs.build.outputs.tag }}.zip
+    #     secrets: inherit
+    # ------------------------------------------------------------------------

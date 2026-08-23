@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Group Snooze — options</title>
+    </head>
+    <body>
+        <main>
+            <h1>Group Snooze</h1>
+
+            <section id="permission-section">
+                <h2>Snapshot access</h2>
+                <p class="muted">
+                    Group Snooze discards collapsed groups without any host access. Granting access to all
+                    sites additionally lets it capture media position and form input immediately before a
+                    tab is discarded, and replay it when the tab comes back. Everything stays in local
+                    storage. Passwords, hidden fields, payment (<code>cc-*</code>) and one-time-code fields
+                    are never read.
+                </p>
+                <p id="permission-state" class="state">Checking…</p>
+                <button id="grant" type="button">Grant access to all sites</button>
+                <button id="revoke" type="button" class="secondary">Revoke access</button>
+            </section>
+
+            <section>
+                <h2>Tab groups</h2>
+                <p class="muted">
+                    Auto-pause is on for every titled group. Untitled groups are never tracked. Turning a
+                    group off here is the same switch as “Auto-pause this group” in the tab context menu.
+                </p>
+                <ul id="groups" class="groups"></ul>
+                <p id="groups-empty" class="muted" hidden>No tab groups recorded yet.</p>
+            </section>
+
+            <section>
+                <h2>Stored data</h2>
+                <p class="muted">Removes every group record and every pending snapshot.</p>
+                <button id="clear" type="button" class="secondary">Clear stored data</button>
+                <span id="clear-state" class="state" role="status"></span>
+            </section>
+        </main>
+        <script type="module" src="./options.ts"></script>
+    </body>
+</html>
