@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Group Snooze - Pause a Chrome Tab Group</title>
+    <meta name="description" content="Chrome extension that discards every tab in a tab group when you collapse it, then restores media position and form input when the tabs come back.">
+    <link rel="icon" type="image/png" href="icon.png">
+    <style>
+        :root {
+            /* The `font:` shorthand is INVALID without a family, and an invalid
+               shorthand drops the WHOLE declaration - so every `font: var(--typescale-*)`
+               below appends this family. */
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+            /* Material 3 Dark — Indigo seed */
+            --primary: #bec2ff;
+            --on-primary: #0b1580;
+            --primary-container: #2f3898;
+            --on-primary-container: #e0e0ff;
+            --secondary-container: #444559;
+            --on-secondary-container: #e1e0f9;
+            --surface: #131318;
+            --on-surface: #e4e1e9;
+            --on-surface-variant: #c7c5d0;
+            --surface-container-low: #1b1b21;
+            --surface-container: #1f1f25;
+            --surface-container-high: #2a2a30;
+            --outline: #91909a;
+            --outline-variant: #46464f;
+
+            /* Shape tokens */
+            --shape-corner-small: 8px;
+            --shape-corner-medium: 12px;
+            --shape-corner-large: 16px;
+            --shape-corner-large-increased: 20px;
+            --shape-corner-full: 9999px;
+
+            /* Type scale */
+            --typescale-display-small: 500 2.25rem/2.75rem;
+            --typescale-headline-small: 400 1.5rem/2rem;
+            --typescale-title-medium: 500 1rem/1.5rem;
+            --typescale-body-large: 400 1rem/1.5rem;
+            --typescale-body-medium: 400 0.875rem/1.25rem;
+            --typescale-label-large: 500 0.875rem/1.25rem;
+            --typescale-label-medium: 500 0.75rem/1rem;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--surface);
+            color: var(--on-surface);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { color: var(--primary); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .container { max-width: 60rem; margin: 0 auto; padding: 0 1.5rem; }
+
+        .hero { text-align: center; padding: 5rem 1.5rem 3rem; }
+        .hero-icon { width: 96px; height: 96px; border-radius: var(--shape-corner-large); }
+        .hero h1 { font: var(--typescale-display-small) var(--font-sans); margin: 1.25rem 0 0.5rem; }
+        .tagline {
+            font: var(--typescale-body-large) var(--font-sans);
+            color: var(--on-surface-variant);
+            max-width: 34rem;
+            margin: 0 auto;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.5rem;
+            border-radius: var(--shape-corner-full);
+            font: var(--typescale-label-large) var(--font-sans);
+            transition: background 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+        .btn:hover { text-decoration: none; }
+        .btn-primary { background: var(--primary); color: var(--on-primary); }
+        .btn-primary:hover { background: var(--on-primary-container); }
+        .btn-secondary {
+            background: var(--surface-container-high);
+            color: var(--on-surface);
+            border: 1px solid var(--outline-variant);
+        }
+        .btn-secondary:hover { background: var(--secondary-container); }
+
+        .screenshot-wrap { padding: 1rem 1.5rem 0; text-align: center; }
+        .screenshot {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--shape-corner-large);
+            border: 1px solid var(--outline-variant);
+            box-shadow: 0 8px 32px rgb(0 0 0 / 0.4);
+        }
+
+        section { padding: 3.5rem 0 0; }
+        h2 { font: var(--typescale-headline-small) var(--font-sans); margin: 0 0 1.5rem; }
+
+        .features { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+        .feature {
+            background: var(--surface-container-low);
+            border: 1px solid var(--outline-variant);
+            border-radius: var(--shape-corner-medium);
+            padding: 1.25rem;
+        }
+        .feature-icon { width: 1.6rem; height: 1.6rem; display: block; margin-bottom: 0.6rem; color: var(--primary); }
+        .feature h3 { font: var(--typescale-title-medium) var(--font-sans); margin: 0 0 0.35rem; }
+        .feature p { font: var(--typescale-body-medium) var(--font-sans); color: var(--on-surface-variant); margin: 0; }
+
+        .steps { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+        .steps li {
+            counter-increment: step;
+            position: relative;
+            padding: 0 0 1.1rem 3rem;
+            color: var(--on-surface-variant);
+            font: var(--typescale-body-large) var(--font-sans);
+        }
+        .steps li::before {
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 0.15rem;
+            width: 1.9rem;
+            height: 1.9rem;
+            display: grid;
+            place-items: center;
+            border-radius: var(--shape-corner-full);
+            background: var(--primary-container);
+            color: var(--on-primary-container);
+            font: var(--typescale-label-medium) var(--font-sans);
+        }
+        .steps strong { color: var(--on-surface); font-weight: 500; }
+
+        .panel {
+            background: var(--surface-container-low);
+            border: 1px solid var(--outline-variant);
+            border-radius: var(--shape-corner-large);
+            padding: 1.5rem;
+        }
+        .panel h3 { font: var(--typescale-title-medium) var(--font-sans); margin: 0 0 0.5rem; }
+        .panel p { font: var(--typescale-body-medium) var(--font-sans); color: var(--on-surface-variant); margin: 0 0 1rem; }
+        .panel ul { margin: 0; padding-left: 1.25rem; color: var(--on-surface-variant); font: var(--typescale-body-medium) var(--font-sans); }
+        .panel li { margin-bottom: 0.3rem; }
+        .panel li:last-child { margin-bottom: 0; }
+
+        .grid-2 { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); }
+
+        pre {
+            background: var(--surface-container);
+            border: 1px solid var(--outline-variant);
+            border-radius: var(--shape-corner-medium);
+            padding: 1rem 1.25rem;
+            overflow-x: auto;
+            margin: 0;
+        }
+        code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.875rem; }
+        .dim { color: var(--outline); }
+
+        .note {
+            border-left: 3px solid var(--primary-container);
+            padding-left: 1rem;
+            color: var(--on-surface-variant);
+            font: var(--typescale-body-medium) var(--font-sans);
+        }
+
+        footer {
+            margin-top: 4rem;
+            padding: 2rem 1.5rem 3rem;
+            text-align: center;
+            border-top: 1px solid var(--outline-variant);
+            color: var(--on-surface-variant);
+            font: var(--typescale-body-medium) var(--font-sans);
+        }
+    </style>
+</head>
+<body>
+
+<section class="hero">
+    <img src="icon.png" alt="Group Snooze" class="hero-icon">
+    <h1>Group Snooze</h1>
+    <p class="tagline">
+        Collapse a Chrome tab group and its tabs are discarded — the memory goes back to your
+        machine. Expand it and your video position and half-typed forms come back with them.
+    </p>
+    <div class="hero-buttons">
+        <a href="https://github.com/dustfeather/chrome-group-discard/releases/latest" class="btn btn-primary">
+            Download latest release
+        </a>
+        <a href="https://github.com/dustfeather/chrome-group-discard" class="btn btn-secondary">
+            View on GitHub
+        </a>
+    </div>
+</section>
+
+<div class="screenshot-wrap">
+    <img src="screenshot-options-dark-1280x800.png" alt="Group Snooze options page" class="screenshot">
+</div>
+
+<div class="container">
+
+    <section>
+        <h2>Features</h2>
+        <div class="features">
+            <div class="feature">
+                <svg class="feature-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M9 5h3v14H9zM15 5h3v14h-3z"/></svg>
+                <h3>Collapse is the pause button</h3>
+                <p>No extra UI to learn. Collapsing a tab group discards every tab in it, immediately.</p>
+            </div>
+            <div class="feature">
+                <svg class="feature-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M4 5h16v14H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M11 9.5l4 2.5-4 2.5z"/></svg>
+                <h3>Media position survives</h3>
+                <p>Video and audio come back at the second you left them, not at zero.</p>
+            </div>
+            <div class="feature">
+                <svg class="feature-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M4 20h4l10-10-4-4L4 16z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 6l4 4" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                <h3>Half-typed forms survive</h3>
+                <p>Text, textareas, checkboxes and selects are replayed when the tab wakes up.</p>
+            </div>
+            <div class="feature">
+                <svg class="feature-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M6 11h12v9H6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 11V8a3 3 0 016 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                <h3>Secrets are never read</h3>
+                <p>Passwords, hidden fields, payment fields and one-time codes are excluded from capture.</p>
+            </div>
+            <div class="feature">
+                <svg class="feature-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 7h8a5 5 0 010 10H8A5 5 0 018 7z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="12" r="2.5"/></svg>
+                <h3>Per-group opt-out</h3>
+                <p>Auto-pause is on for every titled group, and one click turns it off for the ones you want left alone.</p>
+            </div>
+            <div class="feature">
+                <svg class="feature-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M3 12s3.5-6 9-6c1.6 0 3 .5 4.2 1.2M21 12s-3.5 6-9 6c-1.7 0-3.2-.6-4.4-1.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 4l16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <h3>No background tracking</h3>
+                <p>No persistent content script. One function runs at discard, one at restore. That is all.</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>How it works</h2>
+        <ol class="steps">
+            <li><strong>You collapse a titled tab group.</strong> Chrome fires an event; the extension picks it up.</li>
+            <li><strong>Each tab is snapshotted, then discarded.</strong> Media position and filtered form values are read in the instant before the tab goes — that is the only window there is, because <code>beforeunload</code> does not fire on a discard.</li>
+            <li><strong>The tabs stay in the strip, using no memory.</strong> Chrome shows them as it always does; they just are not loaded any more.</li>
+            <li><strong>You expand the group and click a tab.</strong> It reloads, the snapshot is replayed into the page, and then deleted.</li>
+        </ol>
+        <p class="note">
+            Collapsing is immediate and has no grace period, so an accidental collapse-and-expand
+            costs a full reload of the group. Audio in a collapsed group stops. Both are deliberate.
+            Untitled groups are never tracked and never discarded.
+        </p>
+    </section>
+
+    <section>
+        <h2>Privacy</h2>
+        <div class="panel">
+            <h3>Snapshotting is optional and off by default</h3>
+            <p>
+                Group Snooze discards collapsed groups with no host access at all. Reading media
+                position and form values needs access to page content, so that permission is
+                <strong>optional</strong> — you grant it yourself from the options page, and the
+                extension works as a plain discarder without it.
+            </p>
+            <h3>Never captured</h3>
+            <ul>
+                <li><code>input[type=password]</code> and <code>input[type=hidden]</code></li>
+                <li>Payment fields — any <code>autocomplete</code> starting with <code>cc-</code></li>
+                <li><code>autocomplete="one-time-code"</code> fields</li>
+                <li>Anything in a form marked <code>autocomplete="off"</code></li>
+            </ul>
+            <p style="margin-top:1rem">
+                Snapshots live in <code>chrome.storage.local</code>, are never transmitted anywhere,
+                and are deleted on restore, on a URL mismatch, on tab close, or after 24 hours.
+                Full detail in the <a href="privacy.html">privacy policy</a>.
+            </p>
+        </div>
+    </section>
+
+    <section>
+        <h2>Install</h2>
+        <div class="grid-2">
+            <div class="panel">
+                <h3>From a release</h3>
+                <p>
+                    Download the zip from the
+                    <a href="https://github.com/dustfeather/chrome-group-discard/releases/latest">latest release</a>,
+                    unpack it, then load it at <code>chrome://extensions</code> with Developer mode on
+                    and "Load unpacked".
+                </p>
+            </div>
+            <div class="panel">
+                <h3>From source</h3>
+                <p>Requires Node.js &gt;= 22 and pnpm &gt;= 10.</p>
+                <pre><code><span class="dim">$</span> pnpm install
+<span class="dim">$</span> pnpm run build</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Usage</h2>
+        <ul class="panel" style="list-style:none">
+            <li><strong>Collapse a group</strong> — pauses it.</li>
+            <li><strong>Right-click a tab &rarr; Pause this group</strong> — the same thing, from the menu.</li>
+            <li><strong>Right-click a tab &rarr; Auto-pause this group</strong> — uncheck to opt that group out.</li>
+            <li><strong>Options page</strong> — grant or revoke host access, review tracked groups, clear stored data.</li>
+        </ul>
+    </section>
+
+</div>
+
+<footer>
+    <a href="https://github.com/dustfeather/chrome-group-discard">GitHub</a>
+    &nbsp;&middot;&nbsp;
+    <a href="https://github.com/dustfeather/chrome-group-discard/releases/latest">Releases</a>
+    &nbsp;&middot;&nbsp;
+    <a href="privacy.html">Privacy Policy</a>
+    &nbsp;&middot;&nbsp;
+    <a href="https://github.com/dustfeather/chrome-group-discard/blob/main/LICENSE">GPL-3.0</a>
+    <br style="margin-top: 0.75rem;">
+    Maintained by <a href="https://github.com/dustfeather">dustfeather</a>
+</footer>
+
+</body>
+</html>

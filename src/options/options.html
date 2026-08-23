@@ -19,8 +19,10 @@
                     are never read.
                 </p>
                 <p id="permission-state" class="state">Checking…</p>
-                <button id="grant" type="button">Grant access to all sites</button>
-                <button id="revoke" type="button" class="secondary">Revoke access</button>
+                <div class="actions">
+                    <button id="grant" type="button">Grant access to all sites</button>
+                    <button id="revoke" type="button" class="secondary">Revoke access</button>
+                </div>
             </section>
 
             <section>
@@ -36,8 +38,10 @@
             <section>
                 <h2>Stored data</h2>
                 <p class="muted">Removes every group record and every pending snapshot.</p>
-                <button id="clear" type="button" class="secondary">Clear stored data</button>
-                <span id="clear-state" class="state" role="status"></span>
+                <div class="actions">
+                    <button id="clear" type="button" class="secondary">Clear stored data</button>
+                    <span id="clear-state" class="state" role="status"></span>
+                </div>
             </section>
         </main>
         <script type="module" src="./options.ts"></script>

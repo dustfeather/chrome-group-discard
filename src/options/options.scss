@@ -56,9 +56,21 @@ section {
 }
 
 .state {
-    display: inline-block;
+    display: block;
     margin: 0 0 0.9rem;
     font-weight: 600;
+}
+
+/* Buttons sit on their own row, below the status line rather than beside it. */
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+
+    .state {
+        margin: 0;
+    }
 }
 
 button {
