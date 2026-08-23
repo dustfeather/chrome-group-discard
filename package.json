@@ -19,7 +19,7 @@
         "@types/chrome": "^0.2.0",
         "jsdom": "^30.0.1",
         "sass": "^1.100.0",
-        "typescript": "^6.0.3",
+        "typescript": "^7.0.2",
         "vite": "^8.1.4",
         "vitest": "^4.1.11"
     },
