@@ -152,16 +152,17 @@ a hard manual break in the middle.
 
 ---
 
-#### ⏸️ PAUSE — manual, cannot be automated
+#### ✅ PAUSE cleared — 2026-08-25
 
-Everything below step 3 blocks here until a human does this. Do not enable the
-publish job before it is done; the job will fail with an item-not-found error.
+This was the manual break in the rollout. It is done; the `publish-chrome` job
+is enabled and every push to `main` now publishes to the store. Kept for the
+record of what the one-time setup involved.
 
-- [ ] Download the Chrome zip from the GitHub Release of step 3.
-- [ ] Chrome Web Store Developer Dashboard → **New item** → upload that zip.
+- [x] Download the Chrome zip from the GitHub Release of step 3.
+- [x] Chrome Web Store Developer Dashboard → **New item** → upload that zip.
       (One-time $5 developer registration if this account has never published.)
-- [ ] Fill the listing: description, category, screenshots, icon.
-- [ ] **Privacy tab** — this extension needs a real disclosure, not a
+- [x] Fill the listing: description, category, screenshots, icon.
+- [x] **Privacy tab** — this extension needs a real disclosure, not a
       boilerplate one. It requests `<all_urls>` and reads form input.
       Declare: optional host access, used solely to capture media position and
       filtered form values immediately before a tab is discarded and replay
@@ -169,12 +170,13 @@ publish job before it is done; the job will fail with an item-not-found error.
       transmitted; password / hidden / `cc-*` / `one-time-code` fields
       excluded. Link a hosted privacy policy (siblings serve one from
       `docs/privacy.html` via GitHub Pages).
-- [ ] Submit for review, or save as draft — either way the item now exists.
-- [ ] Copy the **item ID** (32-char string in the dashboard URL).
-- [ ] Confirm the CWS API secrets the shared workflow expects are set
-      (`CHROME_CLIENT_ID`, `CHROME_CLIENT_SECRET`, `CHROME_REFRESH_TOKEN`, or
-      whatever `publish-chrome.yml@v4` names them) at org level, plus the item
-      ID wired in as repo variable/secret.
+      Copy lives in `docs/store-listing.md`, sized to the 1000-char fields.
+- [x] Submit for review — reviewed and published.
+- [x] Copy the **item ID** (32-char string in the dashboard URL).
+- [x] Confirm the CWS API secrets are set. `publish-chrome.yml@v4` reads four:
+      `CHROME_CLIENT_ID`, `CHROME_CLIENT_SECRET`, `CHROME_REFRESH_TOKEN` and
+      `CHROME_EXTENSION_ID`. All four are **repo-scoped** — this repo is
+      user-owned, so there is no org scope to inherit from.
 
 Note: first review of an extension requesting `<all_urls>` and touching form
 input is slower than a routine update, and is the most likely thing to bounce.

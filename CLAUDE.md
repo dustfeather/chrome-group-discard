@@ -55,7 +55,10 @@
 - pnpm (not npm/yarn). Chrome only — no Firefox/AMO target.
 - Per-repo ARC runner: `arc-df-chrome-group-discard`. It must exist in k3s
   before any workflow can run.
-- `release.yml` has the `publish-chrome` job commented out until the Chrome Web
-  Store item exists — see the PAUSE checklist in `DESIGN.md` §7.
+- `release.yml`'s `publish-chrome` job is **live**: every push to `main` cuts a
+  release and publishes it to the Chrome Web Store. It passes
+  `artifact-name: extension` because the shared workflow defaults to
+  `extensions`. A missing `CHROME_*` secret makes it skip and exit 0 — a green
+  run is not proof of a publish; grep the log for `uploadState: SUCCESS`.
 - `release.yml` sets `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` — needed until
   `softprops/action-gh-release` ships v3.

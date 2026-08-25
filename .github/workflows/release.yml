@@ -103,19 +103,17 @@ jobs:
                       group-snooze-chrome-${{ steps.version.outputs.tag }}.zip
                       release-notes.txt
 
-    # ------------------------------------------------------------------------
-    # DISABLED until the Chrome Web Store item exists — see DESIGN.md §7.
+    # `artifact-name` must match the `upload-artifact` name above. The shared
+    # workflow defaults it to `extensions` (plural), which would fail the
+    # download step here.
     #
-    # publish-chrome.yml can only UPDATE an existing item; it cannot create one.
-    # Until a human has uploaded a build through the Developer Dashboard once and
-    # the item ID is wired in, enabling this job only produces item-not-found
-    # failures. Uncomment after the PAUSE checklist in DESIGN.md is done.
-    #
-    # publish-chrome:
-    #     needs: build
-    #     uses: dustfeather/shared-workflows/.github/workflows/publish-chrome.yml@v4
-    #     with:
-    #         runner: arc-df-chrome-group-discard
-    #         zip-name: group-snooze-chrome-${{ needs.build.outputs.tag }}.zip
-    #     secrets: inherit
-    # ------------------------------------------------------------------------
+    # A missing CHROME_* secret makes this job skip and exit 0 — a green run is
+    # not proof of a publish. Check the log for `uploadState: SUCCESS`.
+    publish-chrome:
+        needs: build
+        uses: dustfeather/shared-workflows/.github/workflows/publish-chrome.yml@v4
+        with:
+            runner: arc-df-chrome-group-discard
+            artifact-name: extension
+            zip-name: group-snooze-chrome-${{ needs.build.outputs.tag }}.zip
+        secrets: inherit
