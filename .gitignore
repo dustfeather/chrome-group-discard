@@ -3,3 +3,7 @@ node_modules/
 dist/
 graphify-out/
 dist-e2e/
+.claude/
+.env
+.env.*
+!.env.example
