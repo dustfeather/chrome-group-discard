@@ -1,5 +1,7 @@
 # Group Snooze
 
+[![Release](https://github.com/dustfeather/chrome-group-discard/actions/workflows/release.yml/badge.svg)](https://github.com/dustfeather/chrome-group-discard/actions/workflows/release.yml)
+
 Chrome extension that discards every tab in a tab group when you collapse the
 group, and restores media position and form input when the tabs come back.
 
