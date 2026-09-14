@@ -18,7 +18,7 @@ jobs:
     tests:
         permissions:
             contents: read
-        uses: dustfeather/shared-workflows/.github/workflows/node-test.yml@v5
+        uses: dustfeather/shared-workflows/.github/workflows/node-test.yml@v6
         with:
             runner: arc-df-chrome-group-discard
         secrets:
@@ -113,7 +113,7 @@ jobs:
     # not proof of a publish. Check the log for `uploadState: SUCCESS`.
     publish-chrome:
         needs: build
-        uses: dustfeather/shared-workflows/.github/workflows/publish-chrome.yml@v5
+        uses: dustfeather/shared-workflows/.github/workflows/publish-chrome.yml@v6
         with:
             runner: arc-df-chrome-group-discard
             artifact-name: extension
