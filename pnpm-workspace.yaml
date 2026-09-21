@@ -1,6 +1,11 @@
 
 
-# pnpm 12 renamed the build-script allowlist; without this it stops at
-# ERR_PNPM_IGNORED_BUILDS.
+# pnpm 11.0.0 renamed the build-script allowlist onlyBuiltDependencies ->
+# allowBuilds; without it, install stops at ERR_PNPM_IGNORED_BUILDS. Counted in
+# the shipped bundles, because the version in that sentence used to read 12 and
+# was wrong: pnpm 10.20.0 has 0 references to allowBuilds and 35 to
+# onlyBuiltDependencies, 11.0.0 has 77 and 0. Adding onlyBuiltDependencies back
+# "for pnpm 11" is dead config -- 11.19.0 mentions it only in its legacy-key
+# migration list and one error hint, never as a setting it reads.
 allowBuilds:
   '@parcel/watcher': true
