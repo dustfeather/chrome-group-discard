@@ -1,31 +1,26 @@
 {
-    "name": "group-snooze",
-    "version": "1.0.0",
-    "private": true,
-    "type": "module",
-    "scripts": {
-        "dev": "vite",
-        "build": "tsc --noEmit && vite build",
-        "typecheck": "tsc --noEmit",
-        "test": "vitest run",
-        "test:watch": "vitest",
-        "prepare": "git config core.hooksPath .githooks || true",
-        "e2e": "node scripts/e2e.mjs",
-        "e2e:grant": "node scripts/e2e.mjs --grant",
-        "screenshots": "node scripts/screenshots.mjs"
-    },
-    "devDependencies": {
-        "@crxjs/vite-plugin": "^2.7.1",
-        "@types/chrome": "^0.3.0",
-        "jsdom": "^30.1.0",
-        "sass": "^1.103.1",
-        "typescript": "^7.0.2",
-        "vite": "^8.3.0",
-        "vitest": "^4.1.11"
-    },
-    "pnpm": {
-        "onlyBuiltDependencies": [
-            "esbuild"
-        ]
-    }
+  "name": "group-snooze",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepare": "git config core.hooksPath .githooks || true",
+    "e2e": "node scripts/e2e.mjs",
+    "e2e:grant": "node scripts/e2e.mjs --grant",
+    "screenshots": "node scripts/screenshots.mjs"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.7.1",
+    "@types/chrome": "^0.3.0",
+    "jsdom": "^30.1.0",
+    "sass": "^1.103.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^4.1.11"
+  }
 }

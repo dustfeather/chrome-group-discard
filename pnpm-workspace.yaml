@@ -1,0 +1,6 @@
+
+
+# pnpm 12 renamed the build-script allowlist; without this it stops at
+# ERR_PNPM_IGNORED_BUILDS.
+allowBuilds:
+  '@parcel/watcher': true
