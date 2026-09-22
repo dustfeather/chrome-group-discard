@@ -18,15 +18,13 @@ jobs:
     tests:
         permissions:
             contents: read
-        uses: dustfeather/shared-workflows/.github/workflows/node-test.yml@v7
-        with:
-            runner: arc-df-chrome-group-discard
+        uses: dustfeather/shared-workflows/.github/workflows/node-test.yml@v8
         secrets:
             NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     build:
         needs: tests
-        runs-on: arc-df-chrome-group-discard
+        runs-on: ubuntu-latest
         outputs:
             version: ${{ steps.version.outputs.version }}
             tag: ${{ steps.version.outputs.tag }}
@@ -113,9 +111,8 @@ jobs:
     # not proof of a publish. Check the log for `uploadState: SUCCESS`.
     publish-chrome:
         needs: build
-        uses: dustfeather/shared-workflows/.github/workflows/publish-chrome.yml@v7
+        uses: dustfeather/shared-workflows/.github/workflows/publish-chrome.yml@v8
         with:
-            runner: arc-df-chrome-group-discard
             artifact-name: extension
             zip-name: group-snooze-chrome-${{ needs.build.outputs.tag }}.zip
         secrets: inherit
