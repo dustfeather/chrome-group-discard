@@ -15,7 +15,7 @@
     "screenshots": "node scripts/screenshots.mjs"
   },
   "devDependencies": {
-    "@crxjs/vite-plugin": "^2.7.1",
+    "@crxjs/vite-plugin": "^3.0.0",
     "@types/chrome": "^0.3.0",
     "jsdom": "^30.1.1",
     "sass": "^1.105.0",
