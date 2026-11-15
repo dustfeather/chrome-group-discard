@@ -129,11 +129,10 @@ end-to-end against a fake `chrome.tabGroups` / `tabs` / `storage`.
 Workflows copied from `filelist-ext`, all calling
 `dustfeather/shared-workflows@v4`:
 
-- `pr-checks.yml` — `node-test.yml` + `claude-code-review.yml`
+- `pr-checks.yml` — `node-test.yml`
 - `release.yml` — version bump → inject into manifest → build → tag → zip →
   GitHub Release → `publish-chrome.yml`. **Chrome only**: drop the `.xpi`
   packaging and the AMO source-zip steps.
-- `claude.yml`, `dependabot-auto-merge.yml`
 
 ### Release sequence
 
